@@ -1,0 +1,3 @@
+# dsh-agent-selector 安装清单（host bundle + web client）
+- insert:
+    - name: dsh-agent-selector

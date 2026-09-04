@@ -1,0 +1,53 @@
+{
+  "name": "dsh-agent-selector",
+  "version": "0.1.3",
+  "description": "智能体选择器：像模型选择器一样在输入框旁勾选委派目标+具体模型，把对话任务派给外部智能体（Codex CLI / WorkBuddy 内置模型活动价 automation 桥 / WorkBuddy 自定义模型直连 / Claude Code）执行，结果流回 DSH 对话。含 agent_dispatch 工具 + composer 两步下拉 + 设置面板 + 桥健康探活 + 反冒充出处凭证。",
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "agent",
+    "codex",
+    "workbuddy",
+    "hy3",
+    "delegate",
+    "selector"
+  ],
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-connection",
+        "@deepseek-ai/dsh-client-ui-slots",
+        "@deepseek-ai/dsh-client-locale"
+      ],
+      "platform": "web"
+    }
+  },
+  "files": [
+    "lib/index.js",
+    "lib/client.js",
+    "scripts/wb_bridge.py",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jiang12345-code/dsh-agent-selector.git"
+  },
+  "homepage": "https://github.com/jiang12345-code/dsh-agent-selector#readme",
+  "bugs": {
+    "url": "https://github.com/jiang12345-code/dsh-agent-selector/issues"
+  }
+}
