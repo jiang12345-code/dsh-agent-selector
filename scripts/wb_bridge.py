@@ -307,7 +307,7 @@ def parse_args(argv):
     vals = {}
     i = 0
     while i < len(argv):
-        if argv[i] in ("--in", "--out") and i + 1 < len(argv):
+        if argv[i] in ("--in", "--out", "--id") and i + 1 < len(argv):
             vals[argv[i][2:]] = argv[i + 1]
             i += 2
         else:
