@@ -1,0 +1,19 @@
+# awesome-dsh-plugin 市场条目（市场 PR 材料备，提交等 repo≥1 天达标后提）
+id: dsh-agent-selector
+type: plugin
+name: 智能体选择器
+repo: jiang12345-code/dsh-agent-selector
+category: workflow
+shortDescription: "像模型选择器一样在输入框旁勾选委派目标+具体模型，任务派给外部智能体执行，结果回对话。内置：Codex CLI、WorkBuddy hy3 活动价 automation 桥（直写 automations）、WorkBuddy 自定义模型直连（urllib 直连 models.json 端点）、Claude Code（槽位 pin 已修复）。反冒充出处凭证已固化。构建：纯文件化桥 IO（规避 GBK 管道崩溃）、PATHEXT 解析、双 key 注入。"
+longDescriptionPath: docs/README.md
+homepage: https://github.com/jiang12345-code/dsh-agent-selector
+license: MIT
+dependsOnProfileRestart: true
+bundleOnly: false
+screenshots:
+  - path: docs/composer-dropdown.png   # composer 两步下拉菜单（智能体 + 内置模型清单）
+  - path: docs/settings-panel.png       # 设置侧「🤖 智能体选择器」面板
+  - path: docs/delegate-mode-on.png     # 委派模式开启徽标
+installCommand: pwsh -File install.ps1 -ProfileName web
+preRequisites: "Codex CLI + Claude Code CLI + WorkBuddy 桌面端（仅 hy3 和自定义通道用到）+ Python 3.x"
+knownLimits: "逆向依赖：WorkBuddy 升级若改 automations 表/调度器，桥会碎——面板测试按钮即探活。claude-code 通道依赖槽位 pin 机制（新版 2.1.x 目录校验拒绝非官方模型）；修复已部署 v0.1.3。"
