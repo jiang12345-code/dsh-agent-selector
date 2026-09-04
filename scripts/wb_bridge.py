@@ -20,7 +20,8 @@ Usage:
   wb_bridge.py probe                                # health check (stdout JSON)
   wb_bridge.py models                               # aggregate builtin model list
   wb_bridge.py enqueue --in <in.json> --out <out.json>
-      in.json: {"model":"hy3","prompt":"...","cwd":"D:\\dir","timeoutMs":600000}
+      in.json: {"model":"hy3","prompt":"...","cwd":"D:\\dir","timeoutMs":600000,
+                "thinking":1}   # 0/1 思考开关，缺省 1（v0.2.1 起默认开思考）
     out.json: {"ok":true,"text":"...","durationMs":123,"conversationId":"..."} or
               {"ok":false,"reason":"..."}
   wb_bridge.py call --in <in.json> --out <out.json>  # direct channel to a
@@ -125,6 +126,11 @@ def enqueue(payload, out_path=None):
     prompt = payload.get("prompt") or ""
     cwd = payload.get("cwd") or os.getcwd()
     timeout_ms = int(payload.get("timeoutMs") or 600000)
+    # v0.2.1: thinking 可配置（payload.thinking 0/1，缺省 1）——此前硬编码 0 = 委派永远关思考
+    try:
+        thinking = 1 if int(payload.get("thinking", 1)) else 0
+    except Exception:
+        thinking = 1
     if not prompt.strip():
         emit({"ok": False, "reason": "empty prompt"}, out_path); return
     db = None
@@ -167,7 +173,7 @@ def enqueue(payload, out_path=None):
             "scheduled_at": datetime.datetime.now(datetime.timezone.utc)
                 .strftime("%Y-%m-%dT%H:%M:%SZ"),
             "valid_from": None, "valid_until": valid_until_iso, "model_id": model,
-            "model_is_thinking": 0, "push_to_wechat": 0,
+            "model_is_thinking": thinking, "push_to_wechat": 0,
             "owner_user_id": owner_uid, "owner_status": "confirmed",
             "owner_source": "created", "expert_id": None, "expert_marketplace": None,
             "connector_ids_json": "[]", "created_at": ts, "updated_at": ts,
