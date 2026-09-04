@@ -32,6 +32,7 @@ import os
 import sys
 import time
 import datetime
+import shutil  # v0.1.9e: task_dir 读后清理
 import urllib.request
 import urllib.error
 
@@ -150,6 +151,13 @@ def enqueue(payload, out_path=None):
             '若任务本身缺少关键信息无法执行，则在 ' + out_path_task + ' 的开头第一行写 "NEEDS-CLARIFICATION: <缺什么>"，并简述需要澄清的内容。'
         )
         nr = ts + 5000  # next_run_at：5 秒后到期（调度器唯一扫描键，INTEGER ms）
+        # v0.1.9e: valid_until = now + 2h，ISO 8601 UTC（格式对齐 scheduled_at 的
+        # "%Y-%m-%dT%H:%M:%SZ"）。这是幽灵任务的第二道防线：桥进程被强杀/kill、
+        # cleanup 没跑到时，残留行自身已过期，调度器或后续清理逻辑能识别它，
+        # 不会在 WorkBuddy 下次启动时被当作有效 once 任务执行。
+        # 窗口取 2h（远大于 enqueue 最长 600s+120s 的等待窗口），不影响正常任务。
+        valid_until_iso = (datetime.datetime.now(datetime.timezone.utc)
+                           + datetime.timedelta(hours=2)).strftime("%Y-%m-%dT%H:%M:%SZ")
         vals = {
             "id": aid, "name": "DSH委派-%d" % ts,
             "prompt": wrapped, "status": "ACTIVE", "schedule_type": "once",
@@ -157,7 +165,7 @@ def enqueue(payload, out_path=None):
             "cwds": json.dumps([cwd]), "rrule": "",
             "scheduled_at": datetime.datetime.now(datetime.timezone.utc)
                 .strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "valid_from": None, "valid_until": None, "model_id": model,
+            "valid_from": None, "valid_until": valid_until_iso, "model_id": model,
             "model_is_thinking": 0, "push_to_wechat": 0,
             "owner_user_id": owner_uid, "owner_status": "confirmed",
             "owner_source": "created", "expert_id": None, "expert_marketplace": None,
@@ -223,6 +231,11 @@ def enqueue(payload, out_path=None):
             conv = meta.get("conversationId") or ""
         except Exception:
             pass
+        # v0.1.9e: 结果文本已在 done["text"] 里（含 needsClarification 分支），
+        # 回收 task_dir，防止 ~/.dsh/agent-selector/tasks/ 无限堆积。
+        # 超时分支（done is None，上面已 return）刻意不删——残留的 result.md
+        # 可能含部分产出，留给用户排查。
+        shutil.rmtree(task_dir, ignore_errors=True)
         cleanup(db, aid)
         emit({"ok": True, "text": done["text"] or "(agent 未产出文本)",
               "durationMs": int((time.time() - t0) * 1000),
