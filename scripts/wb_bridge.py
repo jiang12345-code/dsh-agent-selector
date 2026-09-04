@@ -145,7 +145,8 @@ def enqueue(payload, out_path=None):
         wrapped = (
             "【委托任务】请完成以下任务：\n\n" + prompt +
             "\n\n【输出要求】把最终成果完整写入文件 " + out_path_task +
-            "（UTF-8 文本），写完即结束，不要做任何其他操作。\n" +
+            "（UTF-8 文本）。重要：先写入 " + out_path_task.replace("result.md", "result.md.tmp") +
+            " 完成后，用一次重命名操作（os.replace 或等价方式）把 .tmp 改名为正式文件——正式文件出现即代表你已完成。写完即结束，不要做任何其他操作。\n" +
             "【记忆协作】若本轮有值得长期记住的发现/约束/结论（项目事实、踩坑、用户拍板），\n" +
             "请在 " + out_path_task + " 的末尾追加一段「## 记忆更新建议」，每条一行（- 开头）。\n" +
             '若任务本身缺少关键信息无法执行，则在 ' + out_path_task + ' 的开头第一行写 "NEEDS-CLARIFICATION: <缺什么>"，并简述需要澄清的内容。'
