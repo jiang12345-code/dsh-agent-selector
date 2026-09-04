@@ -144,7 +144,10 @@ def enqueue(payload, out_path=None):
         wrapped = (
             "【委托任务】请完成以下任务：\n\n" + prompt +
             "\n\n【输出要求】把最终成果完整写入文件 " + out_path_task +
-            "（UTF-8 文本），写完即结束，不要做任何其他操作。"
+            "（UTF-8 文本），写完即结束，不要做任何其他操作。\n" +
+            "【记忆协作】若本轮有值得长期记住的发现/约束/结论（项目事实、踩坑、用户拍板），\n" +
+            "请在 " + out_path_task + " 的末尾追加一段「## 记忆更新建议」，每条一行（- 开头）。\n" +
+            '若任务本身缺少关键信息无法执行，则在 ' + out_path_task + ' 的开头第一行写 "NEEDS-CLARIFICATION: <缺什么>"，并简述需要澄清的内容。'
         )
         nr = ts + 5000  # next_run_at：5 秒后到期（调度器唯一扫描键，INTEGER ms）
         vals = {
@@ -182,7 +185,9 @@ def enqueue(payload, out_path=None):
                 run = db.execute(
                     "SELECT runs_json, thread_title, metadata_json FROM automation_runs "
                     "WHERE automation_id=?", (aid,)).fetchone()
-                done = {"text": open(out_path_task, encoding="utf-8").read().strip(),
+                rtext = open(out_path_task, encoding="utf-8").read().strip()
+                done = {"text": rtext,
+                        "needsClarification": rtext.startswith("NEEDS-CLARIFICATION:"),
                         "run": dict(run) if run else None}
                 break
             run = db.execute(
@@ -197,7 +202,9 @@ def enqueue(payload, out_path=None):
                         pass
                 if not text and run["thread_title"]:
                     text = run["thread_title"]
-                done = {"text": text, "run": dict(run)}
+                done = {"text": text,
+                        "needsClarification": text.startswith("NEEDS-CLARIFICATION:"),
+                        "run": dict(run)}
                 break
         if done is None:
             picked = db.execute(
