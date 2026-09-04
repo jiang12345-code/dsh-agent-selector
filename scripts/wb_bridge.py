@@ -59,14 +59,24 @@ def connect():
     db.row_factory = sqlite3.Row
     return db
 
-# 桌面端内置模型的显示名映射（对照 WorkBuddy 桌面 /model 面板，2026-09-04；新增模型若不在表里则直接显示 id）
+# 桌面端内置模型的显示名映射（对照 WorkBuddy 桌面 /model 面板）。
+# ⚠️ 2026-09-05 v0.2.3：显示名**以 ACP session/new 的 models.availableModels[].name 为准**
+# （宿主下发的权威名，含最新上下架与计价）。本表仅作 automation 通道（bridge models 子命令）
+# 的兜底标签——agents.list 三级回退里 ACP 是第①级，本表只在第②③级生效。
+# 新增模型若不在表里则直接显示 id，不会报错。
 WB_BUILTIN_LABELS = {
     "hy4-preview": "Hy4 preview（限时免费）",
     "hy3": "Hy3（限时免费）",
+    "hy3-x": "Hy3-X（0.05x）",
     "glm-5.3": "GLM-5.3（0.79x）",
     "glm-5.3-flash": "GLM-5.3-Flash（0.06x）",
     "glm-5.2": "GLM-5.2（0.79x 夜间折扣）",
     "glm-5.1": "GLM-5.1",
+    "glm-5v-turbo": "GLM-5V-Turbo",
+    "kimi-k3-2": "Kimi-K3",
+    "kimi-k2.6": "Kimi-K2.6",
+    "kimi-k2.7": "Kimi-K2.7",
+    "minimax-m3-pay": "MiniMax-M3",
     "auto": "自动",
 }
 
