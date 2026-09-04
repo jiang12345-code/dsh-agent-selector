@@ -1,5 +1,9 @@
 # dsh-agent-selector
 
+[![CI](https://github.com/jiang12345-code/dsh-agent-selector/actions/workflows/ci.yml/badge.svg)](https://github.com/jiang12345-code/dsh-agent-selector/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/dsh-agent-selector)](https://www.npmjs.com/package/dsh-agent-selector)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 **智能体选择器** — 像 DSH 的模型选择器一样，在对话输入框旁勾选委派目标与具体模型，把当前对话的任务派给外部智能体执行，结果流回对话。
 
 > Works on DeepSeek Harness (dsh) `0.1.2-alpha.2` · MIT
@@ -34,16 +38,15 @@
 
 ## 安装
 
-```sh
+```powershell
 git clone https://github.com/jiang12345-code/dsh-agent-selector
 cd dsh-agent-selector
-# 把包链接/复制进你的 profile（与其它 dsh 插件相同）：
-#   Copy-Item -Recurse . "$env:USERPROFILE\.dsh\profiles\web\node_modules\dsh-agent-selector\"
-#   并在 profile package.json 的 dsh.profile.bundles 数组加入 "dsh-agent-selector"
-# 重启 DSH（host 半生效）；页面硬刷新（client 半生效）
+pwsh install.ps1 -ProfileName web     # copies into profile + registers in dsh.profile.bundles
 ```
 
-前置依赖见下方「前置依赖」；各通道可独立使用——没装 WorkBuddy 就只用 Codex/Claude 通道，互不影响。
+然后：**重启 DSH**（host 半生效）→ **硬刷新页面**（client 半生效）→ 打开 设置 →「🤖 智能体选择器」跑通道测试。
+
+各通道可独立使用——没装 WorkBuddy 就只用 Codex/Claude 通道，互不影响。前置依赖见下方「前置依赖」。
 
 ## 机制与风险
 
