@@ -138,7 +138,7 @@ def enqueue(payload, out_path=None):
 
         ts = now_ms()
         aid = "automation-%d" % ts
-        task_dir = os.path.join(cwd, ".agent-selector", "wb-%d" % ts)
+        task_dir = os.path.join(os.path.expanduser(r"~\.dsh\agent-selector\tasks"), "wb-%d" % ts)  # v0.1.9d: out of user workspace
         os.makedirs(task_dir, exist_ok=True)
         out_path_task = os.path.join(task_dir, "result.md")
         wrapped = (
@@ -175,6 +175,8 @@ def enqueue(payload, out_path=None):
         back = db.execute("SELECT id FROM automations WHERE id=?", (aid,)).fetchone()
         if not back:
             emit({"ok": False, "reason": "INSERT vanished (readback failed)"}, out_path); return
+        # v0.1.9d: skeleton first — host reads aid from here to cancel ghost rows on abort/timeout
+        emit({"ok": False, "reason": "running", "aid": aid}, out_path)
 
         t0 = time.time()
         deadline = t0 + timeout_ms / 1000.0
@@ -308,6 +310,18 @@ def main():
     cmd = sys.argv[1]
     if cmd == "probe":
         probe(); return
+    if cmd == "cancel":
+        flags = parse_args(sys.argv[2:])
+        aidc = flags.get("id")
+        if not aidc:
+            emit({"ok": False, "reason": "cancel needs --id <automation-id>"}); return
+        try:
+            dbc = connect()
+            cleanup(dbc, aidc)
+            emit({"ok": True, "cancelled": aidc})
+        except Exception as e:
+            emit({"ok": False, "reason": repr(e)})
+        return
     if cmd == "models":
         list_models(); return
     if cmd == "call":
